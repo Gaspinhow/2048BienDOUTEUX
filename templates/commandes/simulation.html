@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block contenu %}
+<div class="simulation">
+  <p class="badge">MODE TEST — aucune clé Stripe configurée</p>
+  <h1>Paiement simulé : {{ commande.total }} €</h1>
+  <form method="post">{% csrf_token %}
+    <label>Nom <input name="nom" value="Client Test"></label>
+    <label>Email <input name="email" type="email" value="test@example.com"></label>
+    <label>Adresse <textarea name="adresse">12 rue de la Paix
+75002 Paris</textarea></label>
+    <button class="bouton" name="payer">Simuler un paiement réussi</button>
+    <button class="lien" name="annuler">Annuler</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block titre %}{{ article.titre }} — {{ NOM_BOUTIQUE }}{% endblock %}
+{% block contenu %}
+<div class="fiche">
+  <div class="galerie">
+    {% for p in article.photos.all %}<img src="{{ p.image.url }}" alt="{{ article.titre }}">{% empty %}<div class="vignette"><span>Pas de photo</span></div>{% endfor %}
+  </div>
+  <div class="fiche-infos">
+    <h1>{{ article.titre }}</h1>
+    <p class="prix grand">{{ article.prix }} €</p>
+    <dl>
+      {% if article.marque %}<dt>Marque</dt><dd>{{ article.marque }}</dd>{% endif %}
+      {% if article.taille %}<dt>Taille</dt><dd>{{ article.taille }}</dd>{% endif %}
+      <dt>État</dt><dd>{{ article.get_etat_display }}</dd>
+      <dt>Catégorie</dt><dd>{{ article.categorie }}</dd>
+    </dl>
+    {% if article.description %}<p class="description">{{ article.description|linebreaksbr }}</p>{% endif %}
+    {% if article.statut == "disponible" %}
+      <form method="post" action="{% url 'commandes:ajouter' article.id %}">{% csrf_token %}
+        <button class="bouton">Ajouter au panier</button>
+      </form>
+      <p class="note">Pièce unique.</p>
+    {% elif article.statut == "reserve" %}
+      <p class="badge">Réservé — un paiement est en cours</p>
+    {% else %}
+      <p class="badge">Vendu</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

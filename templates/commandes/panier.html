@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block titre %}Panier — {{ NOM_BOUTIQUE }}{% endblock %}
+{% block contenu %}
+<h1>Votre panier</h1>
+{% if articles %}
+  <ul class="lignes-panier">
+    {% for a in articles %}
+      <li>
+        {% with p=a.photo_principale %}{% if p %}<img src="{{ p.image.url }}" alt="">{% endif %}{% endwith %}
+        <a href="{{ a.get_absolute_url }}">{{ a.titre }}</a>
+        <span class="prix">{{ a.prix }} €</span>
+        <form method="post" action="{% url 'commandes:retirer' a.id %}">{% csrf_token %}<button class="lien">Retirer</button></form>
+      </li>
+    {% endfor %}
+  </ul>
+  <div class="recap">
+    <p>Sous-total <span>{{ sous_total }} €</span></p>
+    <p>Livraison <span>{{ frais_port }} €</span></p>
+    <p class="total">Total <span>{{ total }} €</span></p>
+    <form method="post" action="{% url 'commandes:valider' %}">{% csrf_token %}
+      <button class="bouton">Payer</button>
+    </form>
+    <p class="note">Vous serez redirigé vers la page de paiement sécurisée Stripe. Les pièces vous sont réservées 30 minutes.</p>
+  </div>
+{% else %}
+  <p class="vide">Votre panier est vide. <a href="{% url 'catalogue:liste' %}">Voir les pièces</a></p>
+{% endif %}
+{% endblock %}

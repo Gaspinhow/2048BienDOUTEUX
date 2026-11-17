@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block titre %}Merci ! — {{ NOM_BOUTIQUE }}{% endblock %}
+{% block contenu %}
+{% if commande.statut == "payee" or commande.statut == "expediee" %}
+  <h1>Merci pour votre commande !</h1>
+  <p>Commande n° <strong>{{ commande.numero }}</strong> — {{ commande.total }} €.</p>
+  <p>Nous préparons votre colis et vous tiendrons informé·e à {{ commande.email }}.</p>
+  <ul class="lignes-panier">{% for l in commande.lignes.all %}<li>{{ l.titre }} <span class="prix">{{ l.prix }} €</span></li>{% endfor %}</ul>
+{% else %}
+  <h1>Paiement en cours de confirmation…</h1>
+  <p>Nous attendons la confirmation de votre banque. Rafraîchissez cette page dans quelques secondes.</p>
+{% endif %}
+<p><a href="{% url 'catalogue:liste' %}">← Retour à la boutique</a></p>
+{% endblock %}

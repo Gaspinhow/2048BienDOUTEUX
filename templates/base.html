@@ -1,0 +1,20 @@
+{% load static %}<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titre %}{{ NOM_BOUTIQUE }}{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+  <header class="entete">
+    <a class="logo" href="{% url 'catalogue:liste' %}">{{ NOM_BOUTIQUE }}</a>
+    <a class="lien-panier" href="{% url 'commandes:panier' %}">Panier{% if nb_panier %} <span class="pastille">{{ nb_panier }}</span>{% endif %}</a>
+  </header>
+  {% if messages %}
+    <ul class="messages">{% for m in messages %}<li class="msg-{{ m.tags }}">{{ m }}</li>{% endfor %}</ul>
+  {% endif %}
+  <main class="contenu">{% block contenu %}{% endblock %}</main>
+  <footer class="pied">© {% now "Y" %} {{ NOM_BOUTIQUE }} · Paiement sécurisé par Stripe</footer>
+</body>
+</html>

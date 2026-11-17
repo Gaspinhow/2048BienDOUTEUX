@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block titre %}{% if categorie %}{{ categorie.nom }} — {% endif %}{{ NOM_BOUTIQUE }}{% endblock %}
+{% block contenu %}
+<nav class="filtres">
+  <a href="{% url 'catalogue:liste' %}" class="{% if not categorie %}actif{% endif %}">Tout</a>
+  {% for c in categories %}
+    <a href="{% url 'catalogue:categorie' c.slug %}" class="{% if categorie == c %}actif{% endif %}">{{ c.nom }}</a>
+  {% endfor %}
+  {% if tailles %}
+  <form method="get" class="filtre-taille">
+    <select name="taille" onchange="this.form.submit()">
+      <option value="">Toutes tailles</option>
+      {% for t in tailles %}<option value="{{ t }}" {% if t == taille %}selected{% endif %}>{{ t }}</option>{% endfor %}
+    </select>
+  </form>
+  {% endif %}
+</nav>
+
+<div class="grille">
+  {% for a in articles %}
+    <a class="carte" href="{{ a.get_absolute_url }}">
+      <div class="vignette">
+        {% with p=a.photo_principale %}{% if p %}<img src="{{ p.image.url }}" alt="{{ a.titre }}" loading="lazy">{% else %}<span>Pas de photo</span>{% endif %}{% endwith %}
+      </div>
+      <div class="infos">
+        <strong>{{ a.titre }}</strong>
+        <span class="meta">{% if a.marque %}{{ a.marque }} · {% endif %}{{ a.taille }}</span>
+        <span class="prix">{{ a.prix }} €</span>
+      </div>
+    </a>
+  {% empty %}
+    <p class="vide">Aucune pièce en vente pour le moment. Revenez bientôt !</p>
+  {% endfor %}
+</div>
+{% endblock %}
