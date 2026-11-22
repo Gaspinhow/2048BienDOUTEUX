@@ -1,0 +1,13 @@
+# /etc/caddy/Caddyfile — Caddy obtient et renouvelle le certificat HTTPS tout seul.
+# Remplacer exemple.fr par le vrai domaine (le DNS doit déjà pointer vers le serveur).
+exemple.fr, www.exemple.fr {
+	encode gzip
+	request_body {
+		max_size 20MB
+	}
+	handle_path /media/* {
+		root * /srv/boutique/media
+		file_server
+	}
+	reverse_proxy 127.0.0.1:8000
+}

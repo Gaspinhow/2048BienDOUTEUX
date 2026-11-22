@@ -4,7 +4,7 @@
 {% if commande.statut == "payee" or commande.statut == "expediee" %}
   <h1>Merci pour votre commande !</h1>
   <p>Commande n° <strong>{{ commande.numero }}</strong> — {{ commande.total }} €.</p>
-  <p>Nous préparons votre colis et vous tiendrons informé·e à {{ commande.email }}.</p>
+  <p>Un email de confirmation a été envoyé à {{ commande.email }}. Nous préparons votre colis.</p>
   <ul class="lignes-panier">{% for l in commande.lignes.all %}<li>{{ l.titre }} <span class="prix">{{ l.prix }} €</span></li>{% endfor %}</ul>
 {% else %}
   <h1>Paiement en cours de confirmation…</h1>

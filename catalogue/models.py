@@ -1,3 +1,7 @@
+import io
+from pathlib import Path
+
+from django.core.files.base import ContentFile
 from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
@@ -79,6 +83,24 @@ class Article(models.Model):
         return photos[0] if photos else None
 
 
+TAILLE_MAX_PHOTO = 1600  # px, côté le plus long
+
+
+def optimiser_image(fichier):
+    """Redresse la photo (orientation EXIF des téléphones), la réduit et la convertit en JPEG."""
+    from PIL import Image, ImageOps
+
+    img = ImageOps.exif_transpose(Image.open(fichier))
+    if img.mode not in ("RGB", "L"):
+        fond = Image.new("RGB", img.size, "white")  # PNG transparents -> fond blanc
+        fond.paste(img, mask=img.convert("RGBA").split()[-1])
+        img = fond
+    img.thumbnail((TAILLE_MAX_PHOTO, TAILLE_MAX_PHOTO))
+    sortie = io.BytesIO()
+    img.save(sortie, "JPEG", quality=85, optimize=True, progressive=True)
+    return ContentFile(sortie.getvalue())
+
+
 class Photo(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="photos")
     image = models.ImageField(upload_to="articles/%Y/%m/")
@@ -89,3 +111,16 @@ class Photo(models.Model):
 
     def __str__(self):
         return f"Photo de {self.article}"
+
+    def save(self, *args, **kwargs):
+        # Seulement pour un nouveau fichier, pas à chaque modification de l'ordre.
+        if self.image and not self.image._committed:
+            nom = Path(self.image.name).stem + ".jpg"
+            self.image.save(nom, optimiser_image(self.image), save=False)
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        stockage, nom = self.image.storage, self.image.name
+        super().delete(*args, **kwargs)
+        if nom:
+            stockage.delete(nom)  # ne pas laisser traîner le fichier sur le disque

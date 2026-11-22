@@ -19,6 +19,7 @@ from django.utils import timezone
 
 from catalogue.models import Article
 
+from . import emails
 from .models import Commande, LigneCommande
 
 
@@ -73,6 +74,8 @@ def confirmer_paiement(commande, *, email="", nom="", telephone="", adresse="", 
         commande.note_interne += f"\n⚠ Déjà vendu(s) ailleurs, à rembourser : {', '.join(deja_revendus)}"
     commande.save()
     Article.objects.filter(lignes__commande=commande).update(statut=Article.Statut.VENDU)
+    # Envoyé seulement une fois la transaction validée, et une seule fois par commande.
+    transaction.on_commit(lambda: emails.commande_payee(commande))
     return commande
 
 

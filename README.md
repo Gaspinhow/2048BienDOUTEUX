@@ -29,7 +29,9 @@ Tests : `python manage.py test`
 | `commandes/panier.py` | Panier en session (liste d'ids : chaque pièce est unique). |
 | `commandes/services.py` | **Toute la logique argent** : réservation, paiement, expiration, Stripe. |
 | `commandes/views.py` | Panier, redirection vers Stripe, pages retour, webhook. |
-| `templates/`, `static/` | HTML et CSS du site public. |
+| `commandes/emails.py` | Emails de confirmation, d'alerte gérant et d'expédition. |
+| `templates/`, `static/` | HTML, CSS et textes des emails. |
+| `deploy/` | Mise en ligne sur un VPS : service, HTTPS, sauvegardes, mises à jour. |
 
 ### Cycle d'une vente
 
@@ -60,10 +62,10 @@ Article DISPONIBLE ──clic "Payer"──▶ RÉSERVÉ (30 min) + Commande EN_
 
 ## Reste à faire (selon le cahier des charges)
 
-- [ ] Emails : confirmation au client, alerte « nouvelle commande » au gérant
-- [ ] Hébergement + stockage des photos (disque persistant ou S3/Cloudflare R2), PostgreSQL si besoin
+- [x] Emails : confirmation au client, alerte au gérant, avis d'expédition
+- [x] Fichiers de mise en ligne sur VPS (voir `deploy/README.md`)
 - [ ] Pages légales : CGV, mentions légales, politique de confidentialité, droit de rétractation (14 jours)
 - [ ] Identité visuelle, page d'accueil, à propos
 - [ ] Options de livraison (Mondial Relay, remise en main propre…)
-- [ ] Redimensionnement automatique des photos à l'upload
+- [x] Photos redressées et réduites automatiquement à l'upload
 - [ ] SEO (sitemap, balises meta, Open Graph pour Instagram)

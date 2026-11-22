@@ -1,0 +1,8 @@
+{% autoescape off %}Bonjour {{ commande.nom }},
+
+Votre commande n° {{ commande.numero }} vient d'être expédiée.
+{% if commande.numero_suivi %}Numéro de suivi : {{ commande.numero_suivi }}
+{% endif %}
+Merci et à bientôt,
+{{ NOM_BOUTIQUE }}
+{% endautoescape %}

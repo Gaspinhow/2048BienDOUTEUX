@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils import timezone
 
+from .emails import commande_expediee
 from .models import Commande, LigneCommande
 
 
@@ -46,9 +47,12 @@ class CommandeAdmin(admin.ModelAdmin):
     def nb_articles(self, obj):
         return len(obj.lignes.all())
 
-    @admin.action(description="Marquer comme expédiée")
+    @admin.action(description="Marquer comme expédiée (et prévenir le client)")
     def marquer_expediee(self, request, queryset):
-        n = queryset.filter(statut=Commande.Statut.PAYEE).update(
-            statut=Commande.Statut.EXPEDIEE, expediee_le=timezone.now()
-        )
-        self.message_user(request, f"{n} commande(s) marquée(s) expédiée(s).")
+        commandes = list(queryset.filter(statut=Commande.Statut.PAYEE))
+        for c in commandes:
+            c.statut = Commande.Statut.EXPEDIEE
+            c.expediee_le = timezone.now()
+            c.save(update_fields=["statut", "expediee_le"])
+            commande_expediee(c)
+        self.message_user(request, f"{len(commandes)} commande(s) expédiée(s), client(s) prévenu(s) par email.")

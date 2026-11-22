@@ -1,0 +1,16 @@
+{% autoescape off %}Bonjour {{ commande.nom }},
+
+Merci pour votre commande n° {{ commande.numero }} chez {{ NOM_BOUTIQUE }} !
+
+{% for l in commande.lignes.all %}- {{ l.titre }} : {{ l.prix }} €
+{% endfor %}Livraison : {{ commande.frais_port }} €
+Total payé : {{ commande.total }} €
+
+Adresse de livraison :
+{{ commande.adresse_livraison }}
+
+Nous préparons votre colis et vous enverrons un email à l'expédition.
+
+À bientôt,
+{{ NOM_BOUTIQUE }}
+{% endautoescape %}

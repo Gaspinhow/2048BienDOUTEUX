@@ -126,3 +126,47 @@ class ParcoursClientTests(Base):
         r = self.client.get(reverse("catalogue:liste"))
         self.assertNotContains(r, "Veste en jean")
         self.assertContains(r, "Blazer laine")
+
+
+@override_settings(EMAIL_GERANT="gerant@friperie.fr")
+class EmailsTests(Base):
+    def test_confirmation_et_alerte_envoyees_une_seule_fois(self):
+        from django.core import mail
+
+        c = services.creer_commande([self.a1.id])
+        with self.captureOnCommitCallbacks(execute=True):
+            services.confirmer_paiement(c, email="cliente@ex.fr", nom="Léa", adresse="3 rue Haute\n69001 Lyon")
+        with self.captureOnCommitCallbacks(execute=True):
+            services.confirmer_paiement(c, email="cliente@ex.fr")  # webhook reçu en double
+        self.assertEqual(len(mail.outbox), 2)
+        destinataires = sorted(m.to[0] for m in mail.outbox)
+        self.assertEqual(destinataires, ["cliente@ex.fr", "gerant@friperie.fr"])
+        client = next(m for m in mail.outbox if m.to == ["cliente@ex.fr"])
+        self.assertIn("Veste en jean", client.body)
+        self.assertIn("69001 Lyon", client.body)
+
+    def test_email_en_panne_ne_bloque_pas_la_vente(self):
+        from unittest import mock
+
+        c = services.creer_commande([self.a1.id])
+        with mock.patch("commandes.emails.send_mail", side_effect=OSError("SMTP down")):
+            with self.captureOnCommitCallbacks(execute=True):
+                services.confirmer_paiement(c, email="cliente@ex.fr")
+        c.refresh_from_db()
+        self.assertEqual(c.statut, Commande.Statut.PAYEE)
+
+    def test_action_expedition_previent_le_client(self):
+        from django.contrib.auth.models import User
+        from django.core import mail
+
+        c = services.creer_commande([self.a1.id])
+        services.confirmer_paiement(c, email="cliente@ex.fr")
+        Commande.objects.filter(pk=c.pk).update(numero_suivi="6A123")
+        User.objects.create_superuser("admin", "a@a.fr", "pw")
+        self.client.login(username="admin", password="pw")
+        self.client.post(reverse("admin:commandes_commande_changelist"),
+                         {"action": "marquer_expediee", "_selected_action": [c.pk]})
+        c.refresh_from_db()
+        self.assertEqual(c.statut, Commande.Statut.EXPEDIEE)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("6A123", mail.outbox[0].body)

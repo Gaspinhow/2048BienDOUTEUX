@@ -1,0 +1,12 @@
+{% autoescape off %}Nouvelle commande payée : {{ commande.numero }} — {{ commande.total }} €
+
+{% for l in commande.lignes.all %}- {{ l.titre }} ({{ l.prix }} €)
+{% endfor %}
+Client : {{ commande.nom }} <{{ commande.email }}> {{ commande.telephone }}
+Livraison :
+{{ commande.adresse_livraison }}
+{% if commande.note_interne %}
+ATTENTION : {{ commande.note_interne }}
+{% endif %}
+À expédier puis marquer « expédiée » dans le back-office.
+{% endautoescape %}

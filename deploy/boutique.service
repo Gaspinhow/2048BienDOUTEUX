@@ -1,0 +1,14 @@
+# /etc/systemd/system/boutique.service — lance le site au démarrage du serveur et le relance s'il plante.
+[Unit]
+Description=Boutique seconde main (gunicorn)
+After=network.target
+
+[Service]
+User=boutique
+WorkingDirectory=/srv/boutique
+EnvironmentFile=/srv/boutique/.env
+ExecStart=/srv/boutique/.venv/bin/gunicorn config.wsgi:application --bind 127.0.0.1:8000 --workers 3 --timeout 30
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
