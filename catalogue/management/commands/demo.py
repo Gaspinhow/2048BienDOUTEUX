@@ -23,8 +23,11 @@ COULEURS = ["#c9b79c", "#7d8f7a", "#b5654a", "#3e5c76", "#d9c5b2", "#8a6f5a"]
 
 
 def image(couleur, texte):
+    """Aplat de couleur avec un léger dégradé (pas de texte : la police par défaut gère mal les accents)."""
     img = Image.new("RGB", (600, 800), couleur)
-    ImageDraw.Draw(img).text((30, 30), texte, fill="white")
+    calque = ImageDraw.Draw(img, "RGBA")
+    for y in range(0, 800, 4):
+        calque.rectangle([0, y, 600, y + 4], fill=(255, 255, 255, int(40 * (1 - y / 800))))
     buf = io.BytesIO()
     img.save(buf, "JPEG", quality=80)
     return ContentFile(buf.getvalue())
